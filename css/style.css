@@ -1,4 +1,38 @@
-/* Stylesheet by UW-Madison, 2018 */
+/* Stylesheet by Jessica Kane, UW-Madison, 2018 */
+
+
+html { 
+    background: url(../img/background.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+/*
+.background-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute;
+}
+
+.background-image::after {
+  content: "";
+  background: url(../img/background2.jpg);
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  opacity: 0.5;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;   
+}
+*/
 
 .states {
     stroke: #000;
@@ -6,9 +40,54 @@
     stroke-linecap: round;
 }
 
+#title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 24px;
+    /*margin 75% 0 0 3%;*/
+    /*position: absolute;
+    top: 1%;
+    left:1%;*/
+    margin: 0px;
+    background-color: #f9f9f9;
+    color: #424242;
+    opacity: .75;
+    width: 680px;
+    /*height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 85px;
+    padding-bottom: 50px;*/
+    padding-left: 1vw;
+}
+
+#metadata {
+    position: fixed;
+    font-family: 'Open Sans', sans-serif;
+    bottom: 0;
+    color: #eaeaea;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+#sources {
+    font-size: 0.8vw;
+}
+
+a:link {
+    color: #eaeaea;
+}
+
+a:visited {
+    color: #c6c6c6;
+}
+
+a:active {
+    color: #565655;
+}
+
 .map {
-    border: medium solid #999;
-    margin: 10px 0 0 20px;
+    /*border: medium solid #999;*/
+    margin: 150px 0 0 20px;
 }
 
 .chart {
@@ -17,18 +96,18 @@
 }
 
 .chartTitle {
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 1.5em;
     font-weight: bold;
 }
 
 .chartBackground {
-    fill: rgba(128,128,128,.2);
+    fill: rgba(0,0,0,0);
 }
 
 .chartFrame {
     fill: none;
-    stroke: #999;
+    /*stroke: #999;*/
     stroke-width: 3px;
     shape-rendering: crispEdges;
 }
@@ -46,3 +125,47 @@
     font-size: 0.8em;
     fill: #999;
 }
+
+.dropdown {
+    position: absolute;
+    z-index: 10;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 2px;
+    /*border: 1px solid #999;*/
+    box-shadow: 2px 2px 4px #999;
+    left: 10px;
+    background-color: #f9f9f9;
+    color: #7a7a7a;
+}
+
+option {
+    font-weight: normal;
+}
+
+.infolabel {
+    position: absolute;
+    height: 50px;
+    min-width: 100px;
+    color: #fff;
+    background-color: #000;
+    border: solid thin #fff;
+    padding: 5px 10px;
+    top: -75px;
+}
+
+.infolabel h1 {
+    margin: 0 20px 0 0;
+    padding: 0;
+    display: inline-block;
+    line-height: 1em;
+}
+
+/*
+@media (max-width: 500px) {
+    #title {
+        display: none;
+    }
+}
+*/
