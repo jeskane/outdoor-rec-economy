@@ -6,22 +6,23 @@
 // ---------------  Pseudo-Global Variables  ---------------    
 
     var attrArray = ["% of Residents Participating in Outdoor Recreation", "Direct Jobs (Per 100 People)", "Consumer Spending (Per Capita)", "Wages Generated (Per Capita)", "State/Local Tax Revenue Generated (Per Capita)"]; //list of attributes
+    
     var expressed = attrArray[0]; //initial attribute
     
     //chart frame dimensions
-        var chartWidth = window.innerWidth * 0.425,
-            chartHeight = 473,
-            leftPadding = 25,
-            rightPadding = 2,
-            topBottomPadding = 5,
-            chartInnerWidth = chartWidth - leftPadding - rightPadding,
-            chartInnerHeight = chartHeight - topBottomPadding * 2,
-            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+    var chartWidth = window.innerWidth * 0.425,
+        chartHeight = 473,
+        leftPadding = 35,
+        rightPadding = 2,
+        topBottomPadding = 5,
+        chartInnerWidth = chartWidth - leftPadding - rightPadding,
+        chartInnerHeight = chartHeight - topBottomPadding * 2,
+        translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
     
-        //create a scale to size bars proportionally to frame and for axis
-        var yScale = d3.scaleLinear()
-            .range([463, 0])
-            .domain([0, 100]);
+    //create a scale to size bars proportionally to frame and for axis
+    //var yScale = d3.scaleLinear()
+    //    .range([463, 0])
+    //    .domain([0, 100]);
 
     //begin script when window loads
     window.onload = setMap();
@@ -114,6 +115,32 @@
         return statesSpatial;
     };
     
+    function createDomainArray(data){
+        //build array of all values of the expressed attribute
+        var domainArray = [];
+        for (var i=0; i<data.length; i++){
+            var val = parseFloat(data[i][expressed]);
+            domainArray.push(val);
+        };
+        
+        return domainArray;
+    };
+    
+    function setyScale(csvData){
+        var domainArray = createDomainArray(csvData);
+        console.log(d3.max(domainArray, function(d){
+            return d;
+        }));
+        var yScale = d3.scaleLinear()
+            .domain([0, 1.05 * d3.max(domainArray, function(d){
+               return d; 
+            })])
+            .range([chartHeight, 0])
+            .nice();
+        
+        return yScale;
+    };
+    
     function setEnumerationUnits(statesSpatial, map, path, colorScale){
         //add states to map
         var states = map.selectAll(".states")
@@ -154,13 +181,21 @@
         var colorScale = d3.scaleThreshold()
             .range(colorClasses);
 
-        //build array of all values of the expressed attribute
-        var domainArray = [];
-        for (var i=0; i<data.length; i++){
-            var val = parseFloat(data[i][expressed]);
-            domainArray.push(val);
-        };
+       
+        
+//        //build array of all values of the expressed attribute
+//        var domainArray = [];
+//        for (var i=0; i<data.length; i++){
+//            var val = parseFloat(data[i][expressed]);
+//            domainArray.push(val);
+//        };
+//        console.log(domainArray);
 
+        
+        var domainArray = createDomainArray(data);
+        //console.log(domainArray);
+        
+        
         //cluster data using ckmeans clustering algorithm to create natural breaks
         var clusters = ss.ckmeans(domainArray, 5);
         
@@ -232,10 +267,18 @@
             .attr("y", 40)
             .attr("class", "chartTitle")
             .text(expressed + " in each state");
+  
+        
+        
+        
+        
+        
+        
+        
+        var yScale = setyScale(csvData);
         
         //create vertical axis generator
-        var yAxis = d3.axisLeft(yScale)
-            .scale(yScale);
+        var yAxis = d3.axisLeft(yScale);
 
         //place axis
         var axis = chart.append("g")
@@ -243,15 +286,15 @@
             .attr("transform", translate)
             .call(yAxis);
 
-        //create frame for chart border
-        var chartFrame = chart.append("rect")
-            .attr("class", "chartFrame")
-            .attr("width", chartInnerWidth)
-            .attr("height", chartInnerHeight)
-            .attr("transform", translate);
+   //     //create frame for chart border
+   //    var chartFrame = chart.append("rect")
+   //         .attr("class", "chartFrame")
+//            .attr("width", chartInnerWidth)
+//            .attr("height", chartInnerHeight)
+//            .attr("transform", translate);
         
         //set bar positions, heights, and colors
-        updateChart(bars, csvData.length, colorScale);
+        updateChart(bars, csvData, colorScale);
     };
 
 // ---------------  User Interactions  ---------------
@@ -309,18 +352,23 @@
             })
             .duration(500);
         
-        updateChart(bars, csvData.length, colorScale);
+        updateChart(bars, csvData, colorScale);
     };
     
     //function to position, size, and color bars in chart
-    function updateChart(bars, n, colorScale){
+    function updateChart(bars, csvData, colorScale){
+        
+        n = csvData.length;
+        
+        var yScale = setyScale(csvData);
+        
         //position bars
         bars.attr("x", function(d, i){
                 return i * (chartInnerWidth / n) + leftPadding;
             })
             //size/resize bars
             .attr("height", function(d, i){
-                return 463 - yScale(parseFloat(d[expressed]));
+                return chartHeight - yScale(parseFloat(d[expressed]));
             })
             .attr("y", function(d, i){
                 return yScale(parseFloat(d[expressed])) + topBottomPadding;
@@ -334,7 +382,13 @@
         var chartTitle = d3.select(".chartTitle")
             .text(expressed + " in each state");
         
-        console.log(bars);
+        //create vertical axis generator
+        var yAxis = d3.axisLeft(yScale);
+        
+        var axis = d3.select(".axis")
+            .call(yAxis);
+            
+        
     };
     
 // ---------------  Highlight/Dehighlight  ---------------
