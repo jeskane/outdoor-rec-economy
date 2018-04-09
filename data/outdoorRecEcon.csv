@@ -1,4 +1,4 @@
-﻿id,name,adm1_code,% of Residents Participating in Outdoor Recreation,Direct Jobs (Per 100 People),Consumer Spending (Per Capita),Wages Generated (Per Capita),State/Local Tax Revenue Generated (Per Capita)
+﻿id,name,adm1_code,Percent of Residents Participating in Outdoor Recreation,Direct Jobs (Per 100 People),Consumer Spending (Per Capita),Wages Generated (Per Capita),State/Local Tax Revenue Generated (Per Capita)
 1,Alabama,USA-3541,55,2.8,2872,800,176
 2,Alaska,USA-3563,81,9.7,9868,3109,456
 3,Arizona,USA-3520,59,2.9,3022,812,200

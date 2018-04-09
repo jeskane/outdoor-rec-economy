@@ -1,28 +1,23 @@
 /* By Jessica Kane, UW-Madison, 2018 */
 
-//First line of main.js...wrap everything in a self-executing anonymous function to move to local scope
+//Wrap everything in a self-executing anonymous function to move to local scope
 (function(){
 
 // ---------------  Pseudo-Global Variables  ---------------    
 
-    var attrArray = ["% of Residents Participating in Outdoor Recreation", "Direct Jobs (Per 100 People)", "Consumer Spending (Per Capita)", "Wages Generated (Per Capita)", "State/Local Tax Revenue Generated (Per Capita)"]; //list of attributes
+    var attrArray = ["Percent of Residents Participating in Outdoor Recreation", "Direct Jobs (Per 100 People)", "Consumer Spending (Per Capita)", "Wages Generated (Per Capita)", "State/Local Tax Revenue Generated (Per Capita)"]; //list of attributes
     
     var expressed = attrArray[0]; //initial attribute
     
     //chart frame dimensions
-    var chartWidth = window.innerWidth * 0.425,
-        chartHeight = 473,
+    var chartWidth = 750,
+        chartHeight = 460,
         leftPadding = 35,
         rightPadding = 2,
         topBottomPadding = 5,
         chartInnerWidth = chartWidth - leftPadding - rightPadding,
         chartInnerHeight = chartHeight - topBottomPadding * 2,
         translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
-    
-    //create a scale to size bars proportionally to frame and for axis
-    //var yScale = d3.scaleLinear()
-    //    .range([463, 0])
-    //    .domain([0, 100]);
 
     //begin script when window loads
     window.onload = setMap();
@@ -32,31 +27,34 @@
     function setMap(){
     
         //map frame dimensions
-        var width = window.innerWidth * 0.5,
+        var width = 750,
             height = 460;
 
         //create new svg container for the map
-        var map = d3.select("body")
+        var mapContainer = d3.select("#container")
+            .append("div")
+            .attr("id", "map-container");
+        
+        var map = d3.select("#map-container")
             .append("svg")
-            .attr("class", "map")
-            .attr("width", width)
-            .attr("height", height);
+            .attr("preserveAspectRatio", "xMinYMin meet")
+            .attr("viewBox", "0 0 " + width + " " + height)
+            .attr("class", "map");
+        
+        //Make map responsive to changing screen size
+        var mapSelect = $(".map");
+        var aspect = mapSelect.width() / mapSelect.height(),
+            container = mapSelect.parent();
+        $(window).on("resize", function() {
+            var targetWidth = container.width();
+            mapSelect.attr("width", targetWidth);
+            mapSelect.attr("height", Math.round(targetWidth / aspect));
+        }).trigger("resize");
 
         //create Albers equal area conic projection centered on US
         var projection = d3.geoAlbersUsa()
-            //.center([0, 38.6])
-            //.rotate([-96, 0, 0])
-            //.parallels([43, 34])
             .scale(1000)
             .translate([width / 2, height / 2]);
-        /* 
-        var projection = d3.geoAlbers()
-            .center([1.82, 39.05])
-            .rotate([101.00, 0, 0])
-            .parallels([43.14, 34.34])
-            .scale(957.58)
-            .translate([width / 2, height / 2]);
-        */
     
         var path = d3.geoPath()
             .projection(projection);
@@ -126,6 +124,7 @@
         return domainArray;
     };
     
+    //Set scale according to data displayed
     function setyScale(csvData){
         var domainArray = createDomainArray(csvData);
         console.log(d3.max(domainArray, function(d){
@@ -180,21 +179,8 @@
         //create color scale generator
         var colorScale = d3.scaleThreshold()
             .range(colorClasses);
-
-       
-        
-//        //build array of all values of the expressed attribute
-//        var domainArray = [];
-//        for (var i=0; i<data.length; i++){
-//            var val = parseFloat(data[i][expressed]);
-//            domainArray.push(val);
-//        };
-//        console.log(domainArray);
-
         
         var domainArray = createDomainArray(data);
-        //console.log(domainArray);
-        
         
         //cluster data using ckmeans clustering algorithm to create natural breaks
         var clusters = ss.ckmeans(domainArray, 5);
@@ -203,13 +189,15 @@
         domainArray = clusters.map(function(d){
             return d3.min(d);
         });
+        
         //remove first value from domain array to create class breakpoints
         domainArray.shift();
 
         //assign array of last 4 cluster minimums as domain
         colorScale.domain(domainArray);
-
+        
         return colorScale;
+        
     };
     
     //function to test for data value and return color
@@ -229,11 +217,25 @@
     function setChart(csvData, colorScale){
 
         //create a second svg element to hold the bar chart
-        var chart = d3.select("body")
+        var chartContainer = d3.select("#container")
+            .append("div")
+            .attr("id", "chart-container");
+        
+        var chart = d3.select("#chart-container")
             .append("svg")
-            .attr("width", chartWidth)
-            .attr("height", chartHeight)
+            .attr("preserveAspectRatio", "xMinYMin meet")
+            .attr("viewBox", "0 0 " + chartWidth + " " + chartHeight)
             .attr("class", "chart");
+        
+        //Make chart responsive to changing screen size
+        var chartSelect = $(".chart");
+        var aspect = chartSelect.width() / chartSelect.height(),
+            container = chartSelect.parent();
+        $(window).on("resize", function() {
+            var targetWidth = container.width();
+            chartSelect.attr("width", targetWidth);
+            chartSelect.attr("height", Math.round(targetWidth / aspect));
+        }).trigger("resize");
         
         //create a rectangle for chart background fill
         var chartBackground = chart.append("rect")
@@ -261,20 +263,13 @@
         var desc = bars.append("desc")
             .text('{"stroke": "none", "stroke-width": "0px"}');
         
-        //below Example 2.8...create a text element for the chart title
+        //Create a text element for the chart title
         var chartTitle = chart.append("text")
-            .attr("x", 40)
-            .attr("y", 40)
+            .attr("x", 70)
+            .attr("y", 30)
             .attr("class", "chartTitle")
-            .text(expressed + " in each state");
+            .text(expressed);
   
-        
-        
-        
-        
-        
-        
-        
         var yScale = setyScale(csvData);
         
         //create vertical axis generator
@@ -285,13 +280,6 @@
             .attr("class", "axis")
             .attr("transform", translate)
             .call(yAxis);
-
-   //     //create frame for chart border
-   //    var chartFrame = chart.append("rect")
-   //         .attr("class", "chartFrame")
-//            .attr("width", chartInnerWidth)
-//            .attr("height", chartInnerHeight)
-//            .attr("transform", translate);
         
         //set bar positions, heights, and colors
         updateChart(bars, csvData, colorScale);
@@ -302,7 +290,7 @@
     //function to create a dropdown menu for attribute selection
     function createDropdown(csvData){
         //add select element
-        var dropdown = d3.select("body")
+        var dropdown = d3.select("#container")
             .append("select")
             .attr("class", "dropdown")
             .on("change", function(){
@@ -380,14 +368,13 @@
         
         //at the bottom of updateChart()...add text to chart title
         var chartTitle = d3.select(".chartTitle")
-            .text(expressed + " in each state");
+            .text(expressed);
         
         //create vertical axis generator
         var yAxis = d3.axisLeft(yScale);
         
         var axis = d3.select(".axis")
             .call(yAxis);
-            
         
     };
     
@@ -423,7 +410,7 @@
             return styleObject[styleName];
         };
         
-        //below Example 2.4 line 21...remove info label
+        //Remove info label
         d3.select(".infolabel")
             .remove();
     };
@@ -432,10 +419,16 @@
     
     //function to create dynamic label
     function setLabel(props){
-        //label content
-        var labelAttribute = "<h1>" + props[expressed] +
-            "</h1><b>" + expressed + "</b>";
 
+        if (expressed == attrArray[0]) {
+            var labelAttribute = "<h1>" + props[expressed] + "%</h1>" + "Residents Participating in Outdoor Recreation";
+        } else if (expressed == attrArray[2] || expressed == attrArray[3] || expressed == attrArray[4]) {
+            var formatComma = d3.format(",");
+            var labelAttribute = "<h1>$" + formatComma(props[expressed]) + "</h1>" + expressed;
+        } else {
+            var labelAttribute = "<h1>" + props[expressed] + "</h1>" + expressed;
+        };
+        
         //create info label div
         var infolabel = d3.select("body")
             .append("div")
@@ -445,7 +438,7 @@
 
         var stateName = infolabel.append("div")
             .attr("class", "labelname")
-            .html(props.name);
+            .html("<b>" + props.name + "</b>");
     };
     
     //function to move info label with mouse
